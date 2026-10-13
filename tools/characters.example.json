@@ -1,0 +1,3 @@
+[
+  {"id":"my-agent","name":"My Agent","machine":"primary","source":"Hermes","skin":"marlow","chat":false,"coordinator":true}
+]

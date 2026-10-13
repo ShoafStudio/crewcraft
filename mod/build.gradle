@@ -1,0 +1,106 @@
+plugins {
+	// Minecraft 26.x is unobfuscated: the non-remapping Loom plugin is used (no mappings, no remapJar).
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	mavenCentral()
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"agentcraft" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+
+	runs {
+		client {
+			// Dev run: offline player named after you (AGENTCRAFT_PLAYER, else the OS user name), 1080p
+			// window. World auto-load/creation, mute and focus behaviour are handled by the mod itself
+			// (see mod/DEV.md).
+			def player = (System.getenv("AGENTCRAFT_PLAYER") ?: System.getProperty("user.name") ?: "Player").replaceAll(/[^A-Za-z0-9_]/, "").take(16) ?: "Player"
+			programArgs "--username", player, "--width", "1920", "--height", "1080"
+			// FFM (java.lang.foreign) is used by the DevBridge for a read-only OS focus check.
+			vmArgs "-Xmx4G", "--enable-native-access=ALL-UNNAMED"
+			runDir "run"
+		}
+		server {
+			runDir "run/server"
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// DevBridge WebSocket server. slf4j-api is already provided by Minecraft, so only the
+	// websocket jar itself is nested (jar-in-jar).
+	clientImplementation("org.java-websocket:Java-WebSocket:${project.java_websocket_version}") {
+		exclude group: 'org.slf4j'
+	}
+	include("org.java-websocket:Java-WebSocket:${project.java_websocket_version}") {
+		exclude group: 'org.slf4j'
+	}
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = "UTF-8"
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+// Seed mod/run with a dev options.txt (muted, 1080p-friendly GUI scale, no onboarding/tutorial
+// noise, no pause on focus loss). Only copied when mod/run/options.txt does not exist yet, so
+// changes made in-game persist. Delete mod/run/options.txt to reset.
+def runOptionsFile = file("run/options.txt")
+def prepareRunDir = tasks.register("prepareRunDir", Copy) {
+	from("run-template")
+	into("run")
+	onlyIf("options.txt not present yet") { !runOptionsFile.exists() }
+}
+
+tasks.matching { it.name == "runClient" }.configureEach {
+	dependsOn(prepareRunDir)
+}
+
+// Unpack the decompiled Minecraft sources into build/mcsrc so agents can grep real 26.3 APIs
+// (`gradlew mcSources`, then search mod/build/mcsrc/net/minecraft/...). Minecraft 26.x is
+// unobfuscated, so these are Mojang's real names.
+tasks.register("mcSources", Sync) {
+	group = "agentcraft"
+	description = "Decompile (genSources) and unpack Minecraft sources into build/mcsrc"
+	dependsOn("genSources")
+	notCompatibleWithConfigurationCache("reads Loom's cache directory at execution time")
+	def loomCache = file(".gradle/loom-cache/minecraftMaven")
+	from {
+		fileTree(loomCache) { include "**/*-sources.jar" }.files.collect { zipTree(it) }
+	}
+	into(layout.buildDirectory.dir("mcsrc"))
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

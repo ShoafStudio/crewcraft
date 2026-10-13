@@ -1,0 +1,10 @@
+CrewCraft is an independent derivative of AgentCraft.
+Upstream: https://github.com/blendi-remade/agentcraft
+Copyright (c) 2026 AgentCraft contributors.
+The upstream MIT license and attribution are preserved in LICENSE.
+
+This distribution starts a fresh source history. No private installation data or
+private deployment history is included. The agentcraft code/resource namespace
+is retained for compatibility with upstream assets and Minecraft blocks.
+Minecraft is a trademark of Mojang/Microsoft. This project is not affiliated
+with or endorsed by Mojang or Microsoft.

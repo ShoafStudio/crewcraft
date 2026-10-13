@@ -1,0 +1,20 @@
+{
+	"required": true,
+	"package": "dev.agentcraft.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"BackupConfirmScreenAccessor",
+		"CameraAccessor",
+		"CameraMixin",
+		"ClientLevelAccessor",
+		"EntityRenderDispatcherMixin",
+		"MinecraftMixin",
+		"RenderSystemMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

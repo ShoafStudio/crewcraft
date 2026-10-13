@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "agentcraft",
+	"version": "${version}",
+	"name": "AgentCraft",
+	"description": "Minecraft as a spatial UI for real multi-agent Claude work.",
+	"authors": [
+		"Blendi"
+	],
+	"license": "MIT",
+	"icon": "assets/agentcraft/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.agentcraft.AgentCraft"
+		],
+		"client": [
+			"dev.agentcraft.client.AgentCraftClient"
+		]
+	},
+	"mixins": [
+		"agentcraft.mixins.json",
+		{
+			"config": "agentcraft.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

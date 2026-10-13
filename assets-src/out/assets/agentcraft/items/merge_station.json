@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "agentcraft:block/merge_station_active"
+  }
+}
