@@ -22,7 +22,7 @@ A fresh installation has **no configured agents, SSH hosts, credentials, pinned 
 Requirements: **Node.js 22+**, **JDK 25**, Python 3, and Git. This repository targets Fabric/Minecraft **26.3**. Minecraft and Foreman run locally. Model-backed features require your own installed, authenticated runtime and may incur that provider’s usage charges. Chrome is needed for Builder’s reference screenshots and design previews.
 
 ```sh
-git clone https://github.com/ShoafStudio/crewcraft.git
+git clone https://github.com/ShoafSystems/crewcraft.git
 cd crewcraft
 npm ci --prefix foreman
 npm ci --prefix tools
